@@ -68,7 +68,7 @@ def check_response(response):
     """проверяет ответ API на соответствие документации."""
     if not isinstance(response, dict):
         raise TypeError(f'в переменной {response} ожидался словарь')
-    if not response.get('homeworks'):
+    if 'homeworks' not in response:
         raise KeyError('В ответе API нет ключей')
     elif not isinstance(response['homeworks'], list):
         raise TypeError(
