@@ -46,7 +46,7 @@ def send_message(bot, message):
         logging.debug('Сообщение отправлено успешно')
     except telegram.error.TelegramError as error:
         logger.error(f'Сбой при отправке сообщения: {error}')
-        raise NoSendMessageException(f'Сбой при отправке : {error}')
+        raise NoSendMessageException
 
 
 def get_api_answer(timestamp):
@@ -68,7 +68,7 @@ def check_response(response):
     """проверяет ответ API на соответствие документации."""
     if not isinstance(response, dict):
         raise TypeError(f'в переменной {response} ожидался словарь')
-    if response.get('homeworks') is None:
+    if not response.get('homeworks'):
         raise KeyError('В ответе API нет ключей')
     elif not isinstance(response['homeworks'], list):
         raise TypeError(
@@ -106,10 +106,13 @@ def main():
             if response['homeworks']:
                 new_status = parse_status(response['homeworks'][0])
                 if new_status != status:
+                    logging.debug('на старт внимание марш отправляю сообщение')
                     send_message(bot, new_status)
                     status = new_status
             current_date = response['current_date']
             timestamp = {'from_date': current_date}
+        except NoSendMessageException as error:
+            logger.error(f'Сбой при отправке сообщения: {error}')
         except Exception as error:
             new_error_mesage = f'Сбой в работе программы: {error}'
             logger.error(new_error_mesage)
